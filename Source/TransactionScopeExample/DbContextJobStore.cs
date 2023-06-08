@@ -5,13 +5,10 @@ using Quartz.Util;
 
 namespace TransactionScopeExample;
 
-public interface IExampleDbContextJobStore {};
 
-public class ExampleDbContextJobStore : DbContextJobStore<ExampleDbContext>, IExampleDbContextJobStore
+public class ExampleDbContextJobStore : DbContextJobStore<ExampleDbContext>
 {
-    public ExampleDbContextJobStore(ExampleDbContext dbContext) : base(dbContext)
-    {
-    }
+    public ExampleDbContextJobStore(ExampleDbContext dbContext) : base(dbContext){ }
 }
 
 /// <summary>
