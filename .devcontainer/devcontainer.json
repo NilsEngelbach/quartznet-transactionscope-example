@@ -1,0 +1,16 @@
+{
+	"name": "C# (.NET) and PostgreSQL (Community)",
+	"dockerComposeFile": "docker-compose.yml",
+	"service": "app",
+	"workspaceFolder": "/workspace",
+	"extensions": [
+		"ms-dotnettools.csharp"
+	],
+	"forwardPorts": [
+		8081 // pgweb
+	],
+	"remoteUser": "vscode",
+	"features": {
+		"ghcr.io/devcontainers/features/docker-in-docker": {}
+	}
+}
