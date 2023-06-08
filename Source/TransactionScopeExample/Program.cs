@@ -10,12 +10,21 @@ builder.Services.AddTransient<ExampleService>();
 
 builder.Services.AddDbContext<ExampleDbContext>();
 
+builder.Services.AddScoped<ExampleDbContextJobStore>();
+
+builder.Services.AddScoped<IExampleDbContextJobStore>(sp =>
+{
+    var dbContext = sp.GetRequiredService<ExampleDbContext>();
+    return new ExampleDbContextJobStore(dbContext);
+});
+
 builder.Services.AddQuartz(q =>
 {
     q.UseMicrosoftDependencyInjectionScopedJobFactory();
 
     q.UsePersistentStore(c =>
     {
+        c.Properties.Add("quartz.jobStore.type", "TransactionScopeExample.IExampleDbContextJobStore");
         c.UseProperties = true;
         c.UseJsonSerializer();
         c.UsePostgres(b => {
