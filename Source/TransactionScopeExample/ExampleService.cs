@@ -15,7 +15,35 @@ public class ExampleService
     }
 
     // Not working: Making changes and add job in same transaction
-    public async Task ExampleMethod()
+    public async Task WithEFTransaction()
+    {
+        using (var dbContextTransaction = _dbContext.Database.BeginTransaction())
+        {
+            // Make changes to entities
+            var entity = _dbContext.ExampleEntities.Add(new ExampleEntity() { Name = new Random().Next(1, 100).ToString() });
+            await _dbContext.SaveChangesAsync();
+
+            // Add job for entity
+            var scheduler = await _schedulerFactory.GetScheduler();
+            
+            var job = JobBuilder.Create<ExampleJob>()
+                .WithIdentity("exampleJob")
+                .UsingJobData("entity-name", entity.Entity.Name)
+                .Build();
+
+            var trigger = TriggerBuilder.Create()
+                .WithIdentity("exampleTrigger")
+                .StartNow()
+                .Build();
+
+            await scheduler.ScheduleJob(job, trigger);
+
+            dbContextTransaction.Commit();
+        }
+    }
+
+    // Not working: Making changes and add job in same transaction
+    public async Task WithTransactionScope()
     {
         using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
         {
@@ -30,6 +58,7 @@ public class ExampleService
                 .WithIdentity("exampleJob")
                 .UsingJobData("entity-name", entity.Entity.Name)
                 .Build();
+                
             var trigger = TriggerBuilder.Create()
                 .WithIdentity("exampleTrigger")
                 .StartNow()
@@ -42,7 +71,7 @@ public class ExampleService
     }
 
     // This is working - but not same transaction
-    public async Task ExampleMethodWithWorkaround()
+    public async Task WithSuppredTransactionScope()
     {
         using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
         {
@@ -73,7 +102,7 @@ public class ExampleService
     }
 
     // This is working - but not same transaction
-    public async Task ExampleMethodWithoutScope()
+    public async Task WithoutTransaction()
     {
         // Make changes to entities
         var entity = _dbContext.ExampleEntities.Add(new ExampleEntity() { Name = new Random().Next(1, 100).ToString() });

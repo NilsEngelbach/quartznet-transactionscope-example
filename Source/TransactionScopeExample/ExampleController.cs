@@ -15,10 +15,10 @@ public class ExampleController : ControllerBase
         _exampleService = exampleService;
     }
 
-    [HttpGet()]
-    public async Task<string> Get()
+    [HttpGet]
+    public async Task<ActionResult> Get()
     {
-        await _exampleService.ExampleMethod();
-        return "Hello World";
+        await _exampleService.WithEFTransaction();
+        return Ok();
     }
 }
